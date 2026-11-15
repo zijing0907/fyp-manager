@@ -1,0 +1,14 @@
+{
+  // Code Runner: the ▶ button compiles every source file (not just the open one),
+  // copies sample_data/ to data/ on the first run, then starts the program.
+  "code-runner.executorMap": {
+    "cpp": "cd \"$workspaceRoot\" && c++ -std=c++17 -Iinclude src/*.cpp -o fyp_manager && (test -d data || cp -R sample_data data) && ./fyp_manager"
+  },
+  // The program is an interactive menu, so it must run in the terminal (the Output tab cannot take typing).
+  "code-runner.runInTerminal": true,
+  "code-runner.saveAllFilesBeforeRun": true,
+
+  // C/C++ extension: lets the editor find headers such as "fyp/cli.hpp" and understand C++17.
+  "C_Cpp.default.includePath": ["${workspaceFolder}/include"],
+  "C_Cpp.default.cppStandard": "c++17"
+}

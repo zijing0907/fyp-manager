@@ -41,7 +41,17 @@ Grading details:
 
 ## Quick start
 
-Requires CMake 3.16+ and a C++17 compiler (tested with Apple clang 17).
+**Quickest (no CMake needed):** any C++17 compiler builds the app in one command.
+
+```bash
+c++ -std=c++17 -Iinclude src/*.cpp -o fyp_manager
+cp -r sample_data data      # a working copy the program is free to edit
+./fyp_manager
+```
+
+**In VS Code:** open this folder (not `src/`) and press ▶ with the Code Runner extension. The included `.vscode/settings.json` builds every source file and starts the program in the terminal.
+
+**With CMake** (3.16+, needed for the tests; tested with Apple clang 17):
 
 ```bash
 cmake -S . -B build
