@@ -1,0 +1,14 @@
+# build output
+build/
+build-*/
+cmake-build-*/
+/fyp_manager
+
+# working copy of the data the program edits while you use it
+# (the pristine starting data lives in sample_data/)
+/data/
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store

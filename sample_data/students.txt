@@ -1,0 +1,8 @@
+# student_id|name
+2400001|Alice Tan
+2400002|Bob Lim
+2400003|Chloe Wong
+2400004|Daniel Lee
+2400005|Emily Ng
+2400006|Farid Hassan
+2400007|Grace Chen

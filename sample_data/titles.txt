@@ -1,0 +1,31 @@
+# id|title|assigned_student_id
+T001|Developing of an IoT Based Smart Parking System|
+T002|Data hiding methods in High dynamic range (HDR) images|2400001
+T003|Asset Management Mobile Application|
+T004|Malaysia Integrated EV Charging Information System|
+T005|Mobile-based Patients Healthcare Management System|2400002
+T006|Combination of Generative Artificial Intelligence and Deep Reinforcement Learning Performance Comparison|
+T007|Develop a customizable VR environment that supports the integration of eye tracking technology for paralyze patient|
+T008|Intelligent Home Design Hub|
+T009|A Mobile Application Development for Water Potability Prediction via Machine Learning Models|2400003
+T010|Development of an IoT-Integrated App for Monitoring Hydroponic Farming Systems|
+T011|Arduino for Physics Electronics Experiments|
+T012|Web Application Development for Person Counting|2400004
+T013|Stock Screening and Recommendation System for Singapore Real Estate Investment Trust|
+T014|Mining significant factors associated with defensive stocks from consumer products and services sector of Bursa Malaysia|
+T015|Real-Time Microplastic Detection in Marine Environments Using Edge AI|
+T016|Student Ride-Sharing Mobile Application for UTAR Sungai Long|2400005
+T017|The use of transformer model to detect fraud in credit card transaction|
+T018|EcoTrack AI A Personalized Carbon Footprint Tracker|
+T019|Sizing Tool for Solar PV and Battery Systems|
+T020|AI Personalized Tutor for University Students|
+T021|A Quantitative Approach on Sustainable Constructions Blockchain Technology Awareness on Trust Issue and Change Resistance|
+T022|On Self-Supervised Contrastive Learning via Neural Collapse|
+T023|Application of optimization techniques in portfolio management|
+T024|Mobile-based Location Services for Event Management|
+T025|Gamified Mood and Wellness Journal|
+T026|Intelligent Document Classification System for Automated Bank Loan Approval|
+T027|Web-based IT Service Management ITSM System for Service Request Management|
+T028|Course and University Recommendation System using Machine Learning|
+T029|AI-Powered Social Media Content Creator Automating Engaging and Optimized Content Generation|
+T030|Smart Mobile Application for Resume Building and Career Advisory Services|
