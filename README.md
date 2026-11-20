@@ -4,16 +4,21 @@
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white)
 ![CMake](https://img.shields.io/badge/build-CMake-064F8C?logo=cmake&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-GoogleTest-4285F4)
+[![Release](https://img.shields.io/github/v/release/zijing0907/fyp-manager)](https://github.com/zijing0907/fyp-manager/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A C++17 command-line system for managing **final-year-project (FYP) titles, student registration and grading**. Data persists in plain text files, the business logic is separated from the UI and storage, and the core is covered by automated tests.
 
-**Tech:** C++17 · CMake · GoogleTest · GitHub Actions (Linux + macOS) · AddressSanitizer / UBSan
+**Tech:** C++17 · CMake · GoogleTest · GitHub Actions (Linux, macOS, Windows) · AddressSanitizer / UBSan
 
 <p align="center">
   <img src="docs/images/demo.gif" width="720"
        alt="Demo: a lecturer opens the colour-coded class summary and a student's result, then a student browses the title list and their shortlist">
 </p>
+
+## Download
+
+Ready-to-run builds for **Windows** and **macOS** (Apple silicon and Intel) are on the [latest release](https://github.com/zijing0907/fyp-manager/releases/latest). Unzip and run `fyp_manager`. The sample data comes with it, and the included `README.txt` explains the one-time security prompt for programs that are not code-signed. To build from source, see [Quick start](#quick-start).
 
 ## Background
 
@@ -166,7 +171,7 @@ The suite covers the services, the file format (round trips, malformed lines, CR
 
 The terminal UI has tests of its own. Plain output must be pure ASCII with no escape codes. A session run with colour, once the colour codes are stripped, must match the plain session character for character, so colour can never change what the program says. Long titles must wrap inside the layout width, and the colour decision honours `NO_COLOR`, `TERM=dumb` and the flags.
 
-The application code compiles warning-free with `-Wall -Wextra -Wpedantic -Wshadow -Wconversion`, and the suite also passes under UndefinedBehaviorSanitizer. Configure with `-DFYP_SANITIZE=ON` to add AddressSanitizer. `.github/workflows/ci.yml` builds and tests on Linux and macOS, plus a sanitizer job on Linux.
+The application code compiles warning-free with `-Wall -Wextra -Wpedantic -Wshadow -Wconversion`, and the suite also passes under UndefinedBehaviorSanitizer. Configure with `-DFYP_SANITIZE=ON` to add AddressSanitizer. `.github/workflows/ci.yml` builds and tests on Linux, macOS and Windows, plus a sanitizer job on Linux. `.github/workflows/release.yml` builds the Windows and macOS downloads, runs each packaged program once as a smoke test, and publishes them when a version tag is pushed.
 
 ## Limitations and next steps
 
