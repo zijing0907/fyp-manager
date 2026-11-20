@@ -22,6 +22,8 @@ add_library(fyp_core
   src/rubric.cpp
   src/serialization.cpp
   src/storage.cpp
+  src/style.cpp
+  src/terminal.cpp
   src/title_service.cpp
   src/util.cpp
 )
@@ -59,6 +61,7 @@ if(FYP_BUILD_TESTS)
     tests/registration_service_test.cpp
     tests/regression_test.cpp
     tests/serialization_test.cpp
+    tests/style_test.cpp
     tests/title_service_test.cpp
     tests/util_test.cpp
   )

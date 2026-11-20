@@ -5,7 +5,9 @@
 ```mermaid
 flowchart TD
     main["main.cpp<br/>argument parsing, wiring"] --> cli
+    main --> term["terminal<br/>colour on or off?"]
     cli["Cli<br/>menus, prompts, formatting"] --> ts & rs & gs
+    cli --> style["Style<br/>tone to ANSI colour, glyphs"]
     ts["TitleService<br/>add / modify / delete / search"]
     rs["RegistrationService<br/>register, shortlist, confirm"]
     gs["GradingService<br/>marks, averages, summary"]
@@ -21,7 +23,8 @@ flowchart TD
 | Rubric | `rubric.hpp` | model |
 | Services | `title_`, `registration_`, `grading_service.hpp` | model, rubric, `Storage` interface |
 | Storage | `storage.hpp`, `serialization.hpp` | model |
-| UI | `cli.hpp` | services (never touches files directly) |
+| UI | `cli.hpp` | services, style (never touches files directly) |
+| Look | `style.hpp`, `terminal.hpp` | nothing |
 
 Rules that keep it testable:
 
@@ -29,6 +32,29 @@ Rules that keep it testable:
 * **The CLI takes `std::istream&` / `std::ostream&`**, so a whole session can be scripted in a test (`tests/cli_test.cpp`).
 * **Services depend on the abstract `Storage`**, so tests use an in-memory fake and the real files can later be replaced by SQLite without touching any business logic.
 * **The clock is injected** into `GradingService`, so timestamps are deterministic in tests.
+
+## Terminal UI
+
+The CLI never writes an escape code itself. It tags text with a **tone** that says what the text means, and `Style::paint` turns the tone into colour or leaves the text alone:
+
+| Tone | Used for | Colour |
+| --- | --- | --- |
+| Heading, Label | banners, section titles, field names, rules | cyan |
+| Key | menu keys and every input prompt ("your turn to type") | orange (256-colour 214) |
+| Strong | values to read first: final marks, counts, table headers | bold |
+| Good / Info / Bad | available or distinction / pass / taken or fail | green / cyan / red |
+| Warn | assessor gaps, validation messages, marks still missing | yellow |
+| Muted | hints, held-by notes, taken titles, incomplete results | grey |
+
+Apart from orange, these are the basic 16 ANSI colours, so they follow the user's terminal theme and stay readable on light backgrounds.
+
+**When colour is used.** `main()` asks `terminal::shouldUseColor`. With no flag, colour needs stdout to be a terminal, `NO_COLOR` unset or empty, and `TERM` not `dumb`. `--color` and `--no-color` override that. On Windows, `enableColorOutput` turns on virtual-terminal processing and UTF-8 output; if the console refuses, the program falls back to plain text. Unicode glyphs (bar blocks, arrow, middle dot) are only used together with colour, so plain output stays pure ASCII.
+
+**Layout.** Everything fits in 72 columns (an 80-column terminal with room to spare). Widths are counted in UTF-8 code points, not bytes, so glyphs line up. Text is padded *before* it is painted, because escape codes would otherwise count towards the width. Titles are word-wrapped under their own column instead of being cut off.
+
+**Pausing.** When stdin and stdout are both a terminal, each action ends with "Press Enter to return to the menu...", so long output such as the class summary is not pushed off screen by the next menu. Scripts, pipes and tests run straight through.
+
+**Tests.** `cli_test.cpp` runs one long session through every screen twice. The plain run must be ASCII with no escape codes. The coloured run, with its escape codes stripped, must equal the plain run exactly, so colour cannot change what the program says.
 
 ## Data model and files
 

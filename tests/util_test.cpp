@@ -70,3 +70,30 @@ TEST(Util, TimestampHasExpectedShape) {
   EXPECT_EQ(ts[10], ' ');
   EXPECT_EQ(ts[13], ':');
 }
+
+TEST(Util, DisplayWidthCountsCharactersNotBytes) {
+  EXPECT_EQ(displayWidth("Pass"), 4u);
+  EXPECT_EQ(displayWidth("\xE2\x96\x88\xE2\x96\x88"), 2u) << "two block glyphs, six bytes";
+  EXPECT_EQ(displayWidth("Ng\xC3\xA9"), 3u);
+  EXPECT_EQ(padRight("\xE2\x96\x88", 3), "\xE2\x96\x88  ");
+  EXPECT_EQ(padLeft("7", 3), "  7");
+  EXPECT_EQ(padRight("too long", 3), "too long") << "never truncates";
+  EXPECT_EQ(repeat("ab", 3), "ababab");
+}
+
+TEST(Util, WrapTextBreaksBetweenWords) {
+  EXPECT_EQ(wrapText("IoT Based Smart Parking System", 40), (std::vector<std::string>{"IoT Based Smart Parking System"}));
+  EXPECT_EQ(wrapText("IoT Based Smart Parking System", 15),
+            (std::vector<std::string>{"IoT Based Smart", "Parking System"}));
+  EXPECT_EQ(wrapText("  spaced   out  ", 20), (std::vector<std::string>{"spaced out"}));
+  EXPECT_EQ(wrapText("", 10), (std::vector<std::string>{""})) << "callers can always print lines[0]";
+}
+
+TEST(Util, WrapTextSplitsWordsLongerThanALine) {
+  EXPECT_EQ(wrapText("a supercalifragilistic word", 8),
+            (std::vector<std::string>{"a", "supercal", "ifragili", "stic", "word"}));
+  EXPECT_EQ(wrapText("\xE2\x96\x88\xE2\x96\x88\xE2\x96\x88", 2),
+            (std::vector<std::string>{"\xE2\x96\x88\xE2\x96\x88", "\xE2\x96\x88"}))
+      << "never cuts a multi-byte character in half";
+  EXPECT_EQ(wrapText("abc", 0), (std::vector<std::string>{"a", "b", "c"})) << "zero width must not loop forever";
+}
