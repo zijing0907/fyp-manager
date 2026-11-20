@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(fyp_manager VERSION 1.0.0 LANGUAGES CXX)
+project(fyp_manager VERSION 1.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,10 +31,13 @@ target_include_directories(fyp_core PUBLIC include)
 
 add_executable(fyp_manager src/main.cpp)
 target_link_libraries(fyp_manager PRIVATE fyp_core)
+target_compile_definitions(fyp_manager PRIVATE FYP_VERSION="${PROJECT_VERSION}")
 
 foreach(target fyp_core fyp_manager)
   if(MSVC)
-    target_compile_options(${target} PRIVATE /W4)
+    # /utf-8: sources are UTF-8 (some tests contain non-English names).
+    target_compile_options(${target} PRIVATE /W4 /utf-8)
+    target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)  # std::getenv is fine here
   else()
     target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Wshadow -Wconversion)
   endif()
@@ -68,6 +71,9 @@ if(FYP_BUILD_TESTS)
   target_include_directories(fyp_tests PRIVATE tests)
   target_compile_definitions(fyp_tests PRIVATE FYP_SAMPLE_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/sample_data")
   target_link_libraries(fyp_tests PRIVATE fyp_core GTest::gtest_main)
+  if(MSVC)
+    target_compile_options(fyp_tests PRIVATE /utf-8)
+  endif()
   if(FYP_SANITIZE AND NOT MSVC)
     target_compile_options(fyp_tests PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
     target_link_options(fyp_tests PRIVATE -fsanitize=address,undefined)

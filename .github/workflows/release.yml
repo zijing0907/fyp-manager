@@ -1,0 +1,109 @@
+name: Release
+
+# Builds ready-to-run downloads for Windows and macOS. A pull request that
+# changes this workflow does a dry run (build, smoke test, upload the zips as
+# workflow artifacts). Pushing a version tag such as v1.1.0 also publishes the
+# zips as a GitHub Release.
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'packaging/**'
+  workflow_dispatch:
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            asset: fyp-manager-windows-x64
+            exe: fyp_manager.exe
+          - os: macos-latest
+            asset: fyp-manager-macos-universal
+            exe: fyp_manager
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      # Tests run in the CI workflow; this build is only the program.
+      # Windows: link the C++ runtime statically so the .exe needs no Visual C++ redistributable.
+      # macOS: one universal binary that runs on Apple silicon and Intel Macs.
+      - name: Configure
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFYP_BUILD_TESTS=OFF
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        run: |
+          dir="dist/${{ matrix.asset }}"
+          mkdir -p "$dir"
+          bin="build/${{ matrix.exe }}"
+          [ -f "$bin" ] || bin="build/Release/${{ matrix.exe }}"  # Visual Studio builds into a per-config folder
+          cp "$bin" "$dir/"
+          cp -R sample_data "$dir/data"
+          cp packaging/README.txt "$dir/README.txt"
+          cp LICENSE "$dir/LICENSE.txt"
+
+      - name: Show what the binary is
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then lipo -info "dist/${{ matrix.asset }}/${{ matrix.exe }}"; fi
+          "dist/${{ matrix.asset }}/${{ matrix.exe }}" --version
+
+      # Run the packaged program from another folder, as a double-click would,
+      # so it has to find the data folder that sits next to it.
+      - name: Smoke test the package
+        run: |
+          mkdir -p elsewhere && cd elsewhere
+          out=$(printf '1\n11\ne\ne\n' | "../dist/${{ matrix.asset }}/${{ matrix.exe }}")
+          echo "$out"
+          grep -q "Loaded 30 titles and 7 students" <<<"$out"
+          grep -q "CLASS SUMMARY  (5 students)" <<<"$out"
+          grep -q "Goodbye" <<<"$out"
+
+      - name: Zip
+        working-directory: dist
+        run: |
+          if [ "$RUNNER_OS" = Windows ]; then
+            7z a "${{ matrix.asset }}.zip" "${{ matrix.asset }}"
+          else
+            zip -r "${{ matrix.asset }}.zip" "${{ matrix.asset }}"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}.zip
+          if-no-files-found: error
+
+  publish:
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}" dist/*.zip
+          --repo "${{ github.repository }}"
+          --title "FYP Management System ${{ github.ref_name }}"
+          --generate-notes
