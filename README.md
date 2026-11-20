@@ -10,6 +10,11 @@ A C++17 command-line system for managing **final-year-project (FYP) titles, stud
 
 **Tech:** C++17 · CMake · GoogleTest · GitHub Actions (Linux + macOS) · AddressSanitizer / UBSan
 
+<p align="center">
+  <img src="docs/images/demo.gif" width="720"
+       alt="Demo: a lecturer opens the colour-coded class summary and a student's result, then a student browses the title list and their shortlist">
+</p>
+
 ## Background
 
 This started as a group assignment for *UECS1004/UECS1104 Programming and Problem Solving* at UTAR (June 2025): a four-person team, one 800-line source file, global arrays. I was the team coordinator. I wrote the student registration and title management features and did most of the debugging and code-style work for the rest of the team.
@@ -37,7 +42,14 @@ Grading details:
 
 * Supervisor and moderator scores are averaged per phase, and the final mark is 30 % FYP1 + 70 % FYP2.
 * A warning is printed when the two assessors' scores differ by **more than 5 marks**, both at entry time and in reports. Raw marks are never altered.
-* The class summary counts Distinction / Pass / Fail / Incomplete and reports mean, highest and lowest final mark.
+* The class summary counts Distinction / Pass / Fail / Incomplete in a bar chart and reports mean, highest and lowest final mark.
+
+Terminal UI:
+
+* Sectioned menus, a status header (title availability, who is logged in, shortlist 2 / 3) and aligned tables. Long titles wrap under their own column.
+* Colour carries meaning, not decoration: green is available / distinction, red is taken / fail, yellow needs attention (assessor gap, marks still missing), orange is something you type.
+* Colour only appears in an interactive terminal. Piped output, files and the tests get plain ASCII. The program honours [`NO_COLOR`](https://no-color.org), and `--color` / `--no-color` override the detection. On Windows the console is switched into ANSI mode first.
+* In an interactive session the program waits for Enter after each action, so a result is not scrolled away by the menu.
 
 ## Quick start
 
@@ -61,6 +73,8 @@ cp -r sample_data data      # a working copy the program is free to edit
 ./build/fyp_manager         # or: ./build/fyp_manager --data path/to/folder
 ```
 
+Colours turn on by themselves in a terminal. Add `--no-color` (or set `NO_COLOR=1`) for plain text, or `--color` to keep them when piping into a pager such as `less -R`.
+
 Run the tests (GoogleTest is downloaded automatically at configure time; add `-DFYP_BUILD_TESTS=OFF` to skip):
 
 ```bash
@@ -73,30 +87,43 @@ The sample data has 30 FYP titles, 7 fictional students and marks that exercise 
 
 Lecturer → *Class summary*, then *Student result* for a student whose supervisor and moderator disagree:
 
+<p align="center">
+  <img src="docs/images/lecturer-report.png" width="647"
+       alt="Class summary with colour-coded outcomes and a bar chart, and a student result with two assessor-gap warnings">
+</p>
+
+The same screens as plain text, which is what you get with `--no-color` or when the output is piped:
+
 ```text
---- Class Summary ---
-ID        Name                         FYP1     FYP2    Final  Outcome
-2400001   Alice Tan                   82.28    87.46    85.91  Distinction
-2400002   Bob Lim                     62.28    61.98    62.07  Pass
-2400003   Chloe Wong                  42.28    38.08    39.34  Fail
-2400004   Daniel Lee                  71.08    74.92    73.77  Pass  (!)
-2400005   Emily Ng                    70.15        -        -  Incomplete
+--- CLASS SUMMARY  (5 students) ----------------------------------------
+  ID       Name         FYP1    FYP2   Final   Outcome
+  -------  ----------  -----   -----   -----   -----------
+  2400001  Alice Tan   82.28   87.46   85.91   Distinction
+  2400002  Bob Lim     62.28   61.98   62.07   Pass
+  2400003  Chloe Wong  42.28   38.08   39.34   Fail
+  2400004  Daniel Lee  71.08   74.92   73.77   Pass         ! gap
+  2400005  Emily Ng    70.15       -       -   Incomplete
 
-Students with a confirmed title: 5
-Distinction: 1  |  Pass: 2  |  Fail: 1  |  Incomplete: 1
-Final mark: mean 65.27, highest 85.91, lowest 39.34
-(!) 1 student(s) with supervisor/moderator scores more than 5 marks apart.
+--- OUTCOMES -----------------------------------------------------------
+  Distinction  ############              1
+  Pass         ########################  2
+  Fail         ############              1
+  Incomplete   ############              1
 
---- Result: Daniel Lee (2400004) ---
-Title: T012  Web Application Development for Person Counting
+  Mean 65.27   Highest 85.91   Lowest 39.34
+  ! gap = supervisor/moderator scores > 5 marks apart (1 student)
+
+--- RESULT: Daniel Lee (2400004) ---------------------------------------
+  Title:  T012  Web Application Development for Person Counting
 
                 Supervisor   Moderator     Average
-FYP1 (30%)           79.17       63.00       71.08
-FYP2 (70%)           79.07       70.77       74.92
-! FYP1: supervisor and moderator differ by 16.17 (more than 5 marks)
-! FYP2: supervisor and moderator differ by 8.30 (more than 5 marks)
+  FYP1 (30%)         79.17       63.00       71.08
+  FYP2 (70%)         79.07       70.77       74.92
 
-Final mark: 73.77  ->  Pass
+  ! FYP1: supervisor and moderator differ by 16.17 (more than 5 marks)
+  ! FYP2: supervisor and moderator differ by 8.30 (more than 5 marks)
+
+  Final mark: 73.77  ->  Pass
 ```
 
 For scripted demos, `--echo` repeats each input line so a piped session reads like a transcript:
@@ -110,6 +137,7 @@ printf '1\n11\ne\ne\n' | ./build/fyp_manager --data sample_data --echo
 ```mermaid
 flowchart LR
     cli["Cli<br/>menus and prompts"] --> svc["Services<br/>Title / Registration / Grading"]
+    cli --> sty["Style<br/>colours and glyphs"]
     svc --> db[("Database<br/>in-memory structs")]
     svc --> st["Storage interface"]
     st --> fs["FileStorage<br/>text files, atomic writes"]
@@ -117,13 +145,13 @@ flowchart LR
 
 ```
 include/fyp/   public headers        src/    implementations        tests/   GoogleTest suite
-sample_data/   starter data set      docs/   design notes
+sample_data/   starter data set      docs/   design notes, screenshots
 ```
 
 * **Model** – plain structs (`Title`, `Student`, `MarkEntry`) in an in-memory `Database`. Titles have stable ids (`T001`…) so nothing breaks when another title is deleted.
 * **Services** – `TitleService`, `RegistrationService`, `GradingService` hold all business rules. They return a `Status` and never print or read input.
 * **Storage** – an abstract `Storage` interface with a `FileStorage` implementation: `|`-delimited text files, escaping, CRLF tolerance, per-record error recovery, and atomic write-then-rename saves.
-* **CLI** – menus and prompts over injected `std::istream` / `std::ostream`, ending cleanly at end-of-input.
+* **CLI** – menus and prompts over injected `std::istream` / `std::ostream`, ending cleanly at end-of-input. The CLI only says what text *means* (a heading, a warning, an available title); a small `Style` decides how that looks: ANSI colour, or plain ASCII. Detecting the terminal is the only platform-specific code (`terminal.cpp`), and the services were not touched to add any of it.
 
 The full picture, file formats and the grading formula are in [docs/design.md](docs/design.md).
 
@@ -136,6 +164,8 @@ The suite covers the services, the file format (round trips, malformed lines, CR
 * shortlists silently rewritten when an unrelated title was deleted,
 * missing marks stored as `-1` and fed into the formulas.
 
+The terminal UI has tests of its own. Plain output must be pure ASCII with no escape codes. A session run with colour, once the colour codes are stripped, must match the plain session character for character, so colour can never change what the program says. Long titles must wrap inside the layout width, and the colour decision honours `NO_COLOR`, `TERM=dumb` and the flags.
+
 The application code compiles warning-free with `-Wall -Wextra -Wpedantic -Wshadow -Wconversion`, and the suite also passes under UndefinedBehaviorSanitizer. Configure with `-DFYP_SANITIZE=ON` to add AddressSanitizer. `.github/workflows/ci.yml` builds and tests on Linux and macOS, plus a sanitizer job on Linux.
 
 ## Limitations and next steps
@@ -143,6 +173,7 @@ The application code compiles warning-free with `-Wall -Wextra -Wpedantic -Wshad
 * Lecturer/student modes are separated in the UI only; there is no authentication.
 * Files are replaced atomically one at a time, not as a single transaction. Swapping `FileStorage` for a SQLite-backed `Storage` would fix that without touching the services.
 * Supervisor/moderator assignments are not modelled, so the assessor role is chosen at entry time.
+* The layout targets an 80-column terminal and counts every character as one column, so names in wide scripts (e.g. Chinese) can push table columns out of line.
 * Sample students, marks and assignments are fictional. The 30 titles come from the original coursework data set.
 
 ## License

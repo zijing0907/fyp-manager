@@ -37,6 +37,80 @@ std::vector<std::string> splitWhitespace(std::string_view s) {
   return words;
 }
 
+namespace {
+
+bool isContinuationByte(char c) { return (static_cast<unsigned char>(c) & 0xC0) == 0x80; }
+
+// Byte offset at which column `columns` starts (or s.size() if the text is shorter).
+std::size_t byteOffsetOfColumn(std::string_view s, std::size_t columns) {
+  std::size_t seen = 0;
+  for (std::size_t i = 0; i < s.size(); ++i) {
+    if (isContinuationByte(s[i])) continue;
+    if (seen == columns) return i;
+    ++seen;
+  }
+  return s.size();
+}
+
+}  // namespace
+
+std::size_t displayWidth(std::string_view s) {
+  return static_cast<std::size_t>(std::count_if(s.begin(), s.end(), [](char c) { return !isContinuationByte(c); }));
+}
+
+std::string padRight(std::string_view s, std::size_t width) {
+  std::size_t w = displayWidth(s);
+  return std::string(s) + std::string(w < width ? width - w : 0, ' ');
+}
+
+std::string padLeft(std::string_view s, std::size_t width) {
+  std::size_t w = displayWidth(s);
+  return std::string(w < width ? width - w : 0, ' ') + std::string(s);
+}
+
+std::string repeat(std::string_view s, std::size_t times) {
+  std::string out;
+  out.reserve(s.size() * times);
+  for (std::size_t i = 0; i < times; ++i) out += s;
+  return out;
+}
+
+std::vector<std::string> wrapText(std::string_view text, std::size_t width) {
+  if (width == 0) width = 1;
+  std::vector<std::string> lines;
+  std::string current;
+  std::size_t currentWidth = 0;
+  for (std::string word : splitWhitespace(text)) {
+    std::size_t w = displayWidth(word);
+    while (w > width) {  // a word longer than a whole line goes on lines of its own, split
+      if (!current.empty()) {
+        lines.push_back(current);
+        current.clear();
+        currentWidth = 0;
+      }
+      std::size_t cut = byteOffsetOfColumn(word, width);
+      lines.push_back(word.substr(0, cut));
+      word.erase(0, cut);
+      w = displayWidth(word);
+    }
+    if (word.empty()) continue;
+    if (current.empty()) {
+      current = word;
+      currentWidth = w;
+    } else if (currentWidth + 1 + w <= width) {
+      current += ' ';
+      current += word;
+      currentWidth += 1 + w;
+    } else {
+      lines.push_back(current);
+      current = word;
+      currentWidth = w;
+    }
+  }
+  if (!current.empty() || lines.empty()) lines.push_back(current);
+  return lines;
+}
+
 std::string escapeField(std::string_view s) {
   std::string out;
   out.reserve(s.size());
