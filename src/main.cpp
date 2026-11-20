@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
-#include <system_error>
 
 #include "fyp/cli.hpp"
 #include "fyp/storage.hpp"
@@ -11,41 +10,23 @@
 #include "fyp/terminal.hpp"
 #include "fyp/util.hpp"
 
-#ifndef FYP_VERSION
-#define FYP_VERSION "dev"  // CMake sets the real version; a one-line compiler build does not
-#endif
-
 namespace {
 
 void printUsage(const char* program) {
-  std::cout << "FYP Management System " << FYP_VERSION << "\n\n"
+  std::cout << "FYP Management System\n\n"
             << "Usage: " << program << " [--data DIR] [--echo] [--color | --no-color]\n\n"
             << "  --data DIR   folder holding titles.txt, students.txt, shortlists.txt and grades.txt\n"
-            << "               (default: ./data, or the data folder next to the program;\n"
-            << "               missing files are treated as empty)\n"
+            << "               (default: ./data; missing files are treated as empty)\n"
             << "  --echo       repeat each input line in the output (for scripted demos)\n"
             << "  --color      always use colours, even when the output is not a terminal\n"
             << "  --no-color   never use colours (also: set the NO_COLOR environment variable)\n"
-            << "  --version    show the version\n"
             << "  --help       show this message\n";
-}
-
-// ./data if it exists, otherwise the "data" folder next to the program. The
-// second case matters when the program is started by double-clicking it: macOS
-// then runs it from the home folder, not from the folder it was unzipped into.
-std::filesystem::path defaultDataDir(const char* program) {
-  const std::filesystem::path here = "data";
-  std::error_code ec;
-  if (std::filesystem::is_directory(here, ec)) return here;
-  std::filesystem::path besideProgram = std::filesystem::absolute(program, ec).parent_path() / "data";
-  if (!ec && std::filesystem::is_directory(besideProgram, ec)) return besideProgram;
-  return here;
 }
 
 }  // namespace
 
 int main(int argc, char** argv) {
-  std::filesystem::path dataDir = defaultDataDir(argv[0]);
+  std::filesystem::path dataDir = "data";
   fyp::Cli::Options options;
   auto colorMode = fyp::terminal::ColorMode::Auto;
 
@@ -58,9 +39,6 @@ int main(int argc, char** argv) {
       colorMode = fyp::terminal::ColorMode::Always;
     } else if (std::strcmp(argv[i], "--no-color") == 0 || std::strcmp(argv[i], "--no-colour") == 0) {
       colorMode = fyp::terminal::ColorMode::Never;
-    } else if (std::strcmp(argv[i], "--version") == 0) {
-      std::cout << "fyp_manager " << FYP_VERSION << '\n';
-      return 0;
     } else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
       printUsage(argv[0]);
       return 0;
