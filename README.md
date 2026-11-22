@@ -168,14 +168,6 @@ The terminal UI has tests of its own. Plain output must be pure ASCII with no es
 
 The application code compiles warning-free with `-Wall -Wextra -Wpedantic -Wshadow -Wconversion`, and the suite also passes under UndefinedBehaviorSanitizer. Configure with `-DFYP_SANITIZE=ON` to add AddressSanitizer. `.github/workflows/ci.yml` builds and tests on Linux and macOS, plus a sanitizer job on Linux.
 
-## Limitations and next steps
-
-* Lecturer/student modes are separated in the UI only; there is no authentication.
-* Files are replaced atomically one at a time, not as a single transaction. Swapping `FileStorage` for a SQLite-backed `Storage` would fix that without touching the services.
-* Supervisor/moderator assignments are not modelled, so the assessor role is chosen at entry time.
-* The layout targets an 80-column terminal and counts every character as one column, so names in wide scripts (e.g. Chinese) can push table columns out of line.
-* Sample students, marks and assignments are fictional. The 30 titles come from the original coursework data set.
-
 ## License
 
 [MIT](LICENSE)
