@@ -132,6 +132,70 @@ For scripted demos, `--echo` repeats each input line so a piped session reads li
 printf '1\n11\ne\ne\n' | ./build/fyp_manager --data sample_data --echo
 ```
 
+### Every screen
+
+All of these come from one scripted session on a copy of the sample data. The lecturer adds, edits and deletes a title, registers a new student (Hannah Lim), confirms a title for Farid and enters marks for Emily. Hannah then logs in and builds her shortlist. The numbers are the menu options. Click a group to open it.
+
+<details>
+<summary><b>Lecturer</b> (13 screens)</summary>
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top"><b>Main menu</b><br><img src="docs/images/screens/main-menu.png" alt="Main menu"></td>
+<td width="50%" valign="top"><b>Lecturer menu</b><br><img src="docs/images/screens/lecturer-menu.png" alt="Lecturer menu"></td>
+</tr>
+<tr>
+<td valign="top"><b>1 · List all titles</b><br><img src="docs/images/screens/lecturer-list-all-titles.png" alt="List all titles"></td>
+<td valign="top"><b>2 · Search titles</b><br><img src="docs/images/screens/lecturer-search-titles.png" alt="Search titles"></td>
+</tr>
+<tr>
+<td valign="top"><b>3 · Add a title</b><br><img src="docs/images/screens/lecturer-add-a-title.png" alt="Add a title"></td>
+<td valign="top"><b>4 · Modify a title</b><br><img src="docs/images/screens/lecturer-modify-a-title.png" alt="Modify a title"></td>
+</tr>
+<tr>
+<td valign="top"><b>5 · Delete a title</b><br><img src="docs/images/screens/lecturer-delete-a-title.png" alt="Delete a title"></td>
+<td valign="top"><b>6 · Register a student</b><br><img src="docs/images/screens/lecturer-register-a-student.png" alt="Register a student"></td>
+</tr>
+<tr>
+<td valign="top"><b>7 · List students</b><br><img src="docs/images/screens/lecturer-list-students.png" alt="List students"></td>
+<td valign="top"><b>8 · Confirm a student's title</b><br><img src="docs/images/screens/lecturer-confirm-a-student-title.png" alt="Confirm a student's title"></td>
+</tr>
+<tr>
+<td valign="top"><b>9 · Enter marks</b><br><img src="docs/images/screens/lecturer-enter-marks.png" alt="Enter marks"></td>
+<td valign="top"><b>10 · View a student's result</b><br><img src="docs/images/screens/lecturer-view-a-student-result.png" alt="View a student's result"></td>
+</tr>
+<tr>
+<td valign="top"><b>11 · Class summary</b><br><img src="docs/images/screens/lecturer-class-summary.png" alt="Class summary"></td>
+<td></td>
+</tr>
+</table>
+</details>
+
+<details>
+<summary><b>Student</b> (7 screens)</summary>
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top"><b>Log in</b><br><img src="docs/images/screens/student-login.png" alt="Log in"></td>
+<td width="50%" valign="top"><b>1 · View all titles</b><br><img src="docs/images/screens/student-view-all-titles.png" alt="View all titles"></td>
+</tr>
+<tr>
+<td valign="top"><b>2 · Search titles</b><br><img src="docs/images/screens/student-search-titles.png" alt="Search titles"></td>
+<td valign="top"><b>3 · Add to shortlist</b><br><img src="docs/images/screens/student-add-to-shortlist.png" alt="Add to shortlist"></td>
+</tr>
+<tr>
+<td valign="top"><b>4 · Remove from shortlist</b><br><img src="docs/images/screens/student-remove-from-shortlist.png" alt="Remove from shortlist"></td>
+<td valign="top"><b>5 · View my shortlist</b><br><img src="docs/images/screens/student-view-my-shortlist.png" alt="View my shortlist"></td>
+</tr>
+<tr>
+<td valign="top"><b>A student whose title is confirmed</b><br><img src="docs/images/screens/student-confirmed.png" alt="A student whose title is confirmed"></td>
+<td></td>
+</tr>
+</table>
+</details>
+
 ## How it is built
 
 ```mermaid
